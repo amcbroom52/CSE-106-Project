@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Home</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+
+<body>
+  <div class="new-post-page">
+    <h6>Post your thoughts...</h6>
+    <form action="{{url_for('makePost')}}" method="POST">
+      <input type="text" name="text" class="new-post-text">
+      <button type="submit" value="submit" class="new-post-button">Post</button>
+    </form>
+
+  </div>
+</body>
+
+
+</html>

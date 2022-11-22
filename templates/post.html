@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Home</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+
+<body>
+  <div class="post-page">
+    <div class="post">
+      <div class="info">
+        <h3>{{post.User.displayName}}</h3>
+        <h3>{{post.timePosted.strftime('%m/%d %H:%M')}}</h3>
+      </div>
+      <p class="post-text">{{post.text}}</p>
+    </div>
+    <div class="write-comment">
+      <form action="{{url_for('makeComment', postID=post.id)}}" method="POST">
+        <input type="text" name="text" placeholder="Leave a comment...">
+        <button type="submit" value="post" class="comment-button">Post</button>
+      </form>
+    </div>
+
+    {% for comment in comments %}
+    <div class="comment">
+      <div class="info">
+        <h3>{{comment.User.displayName}}</h3>
+        <h3>{{comment.timePosted.strftime('%m/%d %H:%M')}}</h3>
+      </div>
+      <p class="post-text">{{comment.text}}</p>
+    </div>
+    {%endfor%}
+  </div>
+</body>
+
+
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Home</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+
+<body>
+  <div class="post-page">
+    {% for post in posts %}
+    <a class="post-link" href="{{url_for('post', postID=post.id)}}">
+      <div class="post">
+        <div class="info">
+          <h3>{{post.User.displayName}}</h3>
+          <h3>{{post.timePosted.strftime('%m/%d %H:%M')}}</h3>
+        </div>
+
+        <p class="post-text">{{post.text}}</p>
+
+        {%if post.comments%}
+        <a href="{{url_for('post', postID=post.id)}}" class="load-comments">Load Comments</a>
+        {%endif%}
+      </div>
+    </a>
+    {%endfor%}
+  </div>
+  <a href="{{url_for('makePost')}}"><button class="new-post">+</button></a>
+</body>
+
+
+</html>

@@ -1,0 +1,119 @@
+body {
+  background-color: rgb(3, 10, 18);
+}
+
+.post-page {
+  width: 70%;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.info {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.post {
+  color: white;
+  display: flex;
+  flex-direction: row;
+  border: 1px solid white;
+  display: flex;
+  flex-direction: column;
+  padding: 2%;
+}
+
+.post-link {
+  text-decoration: none;
+}
+
+.post-text {
+  font-size: 125%;
+}
+
+.write-comment {
+  color: white;
+  display: flex;
+  border: 1px solid white;
+  padding: 2%;
+  display: flex;
+  flex-direction: row;
+  float: left;
+}
+
+.write-comment input {
+  background-color: rgb(3, 10, 18);
+  padding: 2%;
+  border-radius: 15px;
+  width: 90%;
+}
+
+.write-comment button {
+  background-color: rgb(3, 10, 18);
+  color: rgb(85, 0, 164);
+  border: 1px solid rgb(38, 0, 73);
+  border-radius: 25px;
+  font-size: 15px;
+  padding: 2%;
+}
+
+.load-comments {
+  color: rgb(36, 85, 176);
+}
+
+.comment {
+  color: white;
+  display: flex;
+  flex-direction: row;
+  border: 1px solid white;
+  display: flex;
+  flex-direction: column;
+  padding: 2%;
+  margin: 5%;
+  margin-top: 0%;
+}
+
+.new-post {
+  width: 5%;
+  height: 5%;
+}
+
+.new-post-page {
+  width: 70%;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: white;
+  font-size: 50px;
+}
+
+.new-post-page input {
+  width: 100%;
+  height: 300px;
+  background-color: rgba(255, 255, 255, 0);
+  color: white;
+  border: 0.5px solid white;
+  resize: none;
+  box-sizing: border-box;
+}
+
+.new-post-button {
+  background-color: rgb(3, 10, 18);
+  color: rgb(85, 0, 164);
+  border: 1px solid rgb(38, 0, 73);
+  border-radius: 25px;
+  font-size: 15px;
+  padding: 2%;
+}
+
+:hover .new-post-button {
+  cursor: pointer;
+}
+
+.post-link a:hover {
+  background-color: aqua;
+}

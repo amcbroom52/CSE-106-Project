@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!--Login Page-->
+
+<head>
+  <title>Login</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/authentication.css') }}">
+  <title>Document</title>
+</head>
+
+<body>
+  <div class="login-page">
+    <div class="login-outer">
+      <div class="login-inner">
+        <h1 class="login-title">Login Page</h1>
+        <form action="{{ url_for('login')}}" method="post">
+          <!-- <label for="userName">Username</label> -->
+          <input type="text" name="username" id="userName" placeholder="Username">
+          <br><br>
+          <!-- <label for="Password">Password</label> -->
+          <input type="password" name="password" id="Password" placeholder="Password">
+          <br><br>
+          <button type="submit" value="submit" class="login-button">Sign in</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+
+
+</html>

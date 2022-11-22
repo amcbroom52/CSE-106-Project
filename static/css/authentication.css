@@ -1,0 +1,117 @@
+.login-page {
+  background-color: rgb(3, 10, 18);
+  position: absolute;
+  display: table;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.login-outer {
+  display: table-cell;
+  vertical-align: middle;
+  margin: auto;
+}
+
+.login-inner {
+  margin-left: auto;
+  margin-right: auto;
+  background-color: rgb(85, 0, 164);
+  width: 30%;
+  height: 70%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  border-radius: 25px;
+}
+
+.login-inner input {
+  width: 80%;
+  height: 40px;
+  background-color: rgb(3, 10, 18);
+  color: white;
+  border: 0.5px solid rgb(38, 0, 73);
+  resize: none;
+  box-sizing: border-box;
+  border-radius: 15px;
+  padding: 2%;
+}
+
+.login-title {
+  margin-bottom: 15%;
+  font-size: 50px;
+}
+
+.login-button {
+  background-color: rgb(3, 10, 18);
+  color: rgb(85, 0, 164);
+  border: 1px solid rgb(38, 0, 73);
+  border-radius: 25px;
+  font-size: 15px;
+  padding: 2%;
+}
+
+:hover .login-button {
+  cursor: pointer;
+}
+
+.registration-page {
+  background-color: rgb(3, 10, 18);
+  position: absolute;
+  display: table;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.registration-outer {
+  display: table-cell;
+  vertical-align: middle;
+  margin: auto;
+}
+
+.registration-inner {
+  margin-left: auto;
+  margin-right: auto;
+  background-color: rgb(85, 0, 164);
+  width: 30%;
+  height: 70%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  border-radius: 25px;
+}
+
+.registration-inner input {
+  width: 80%;
+  height: 40px;
+  background-color: rgb(3, 10, 18);
+  color: white;
+  border: 0.5px solid rgb(38, 0, 73);
+  resize: none;
+  box-sizing: border-box;
+  border-radius: 15px;
+  padding: 2%;
+}
+
+.registration-title {
+  margin-bottom: 15%;
+  font-size: 50px;
+}
+
+.register-button {
+  background-color: rgb(3, 10, 18);
+  color: rgb(85, 0, 164);
+  border: 1px solid rgb(38, 0, 73);
+  border-radius: 25px;
+  font-size: 15px;
+  padding: 2%;
+}
+
+:hover .register-button {
+  cursor: pointer;
+}
