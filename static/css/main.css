@@ -45,7 +45,7 @@ body {
 }
 
 .write-comment input {
-  background-color: rgb(3, 10, 18);
+  background-color: white;
   padding: 2%;
   border-radius: 15px;
   width: 90%;

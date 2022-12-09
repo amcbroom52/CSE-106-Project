@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Feed</title>
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+  <script src="https://kit.fontawesome.com/c678b401a2.js" crossorigin="anonymous"></script>
+
+</head>
+
+<body>
+
+  <!-- Navbar -->
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav mx-auto">
+        
+        <li class="nav-item active">
+          <a class="nav-link" href="/"><i class="fa-sharp fa-solid fa-newspaper"></i><span class="sr-only">(current)</span></a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="/messages"><i class="fa-solid fa-envelope"></i></a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="/profile"><i class="fa-solid fa-user"></i></a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  
+
+  <div class="post-page">
+    {% for post in posts %}
+    <a class="post-link" href="{{url_for('post', postID=post.id)}}">
+      <div class="post">
+        <div class="info">
+          <h3>{{post.User.displayName}}</h3>
+          <h3>{{post.timePosted.strftime('%m/%d %H:%M')}}</h3>
+        </div>
+
+        <p class="post-text">{{post.text}}</p>
+
+        {%if post.comments%}
+        <a href="{{url_for('post', postID=post.id)}}" class="load-comments">Load Comments</a>
+        {%endif%}
+      </div>
+    </a>
+    {%endfor%}
+  </div>
+  <a href="{{url_for('makePost')}}"><button class="new-post">+</button></a>
+</body>
+
+</html>

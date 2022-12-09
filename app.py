@@ -85,7 +85,7 @@ def login():
 @login_required
 def home():
   posts = Post.query.order_by(Post.timePosted.desc()).all()
-  return render_template('home.html', posts = posts)
+  return render_template('feed.html', posts = posts)
 
 @app.route('/post/<int:postID>')
 @login_required
@@ -113,6 +113,16 @@ def makePost():
   db.session.add(post)
   db.session.commit()
   return redirect(url_for('home'))
+
+@app.route('/messages', methods=['GET'])
+@login_required
+def render_messages():
+  return render_template('messages.html')
+
+@app.route('/profile', methods=['GET'])
+@login_required
+def render_profile():
+  return render_template('profile.html')
 
 admin.add_view(ModelView(User, db.session))
 admin.add_view(ModelView(Comment, db.session))
