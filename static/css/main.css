@@ -5,6 +5,7 @@ body {
 .post-page {
   width: 70%;
   margin: auto;
+  margin-top:2.5%;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
