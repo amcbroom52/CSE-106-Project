@@ -1,26 +1,56 @@
 from flask import Flask, render_template_string, render_template, request, redirect, url_for
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
-from flask_admin import Admin 
+from flask_admin import Admin, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
+from flask_admin.menu import MenuLink 
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_bcrypt import Bcrypt
 from datetime import datetime
 
 
 app = Flask(__name__)
+bcrypt = Bcrypt(app)
 CORS(app)
 
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.sqlite"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
-admin = Admin(app, name='microblog', template_mode='bootstrap3') 
+ 
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 app.secret_key = 'super secret key'
 db = SQLAlchemy(app)
 db.init_app(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+  return User.query.get(int(user_id))
+
+
+#function to restricts access to admin "home" page to anyone other than "Admin"
+class MyAdminIndexView(AdminIndexView):
+  def is_accessible(self):
+    if(current_user.is_authenticated and current_user.username == "Admin"):
+      return current_user.is_authenticated
+
+  def inaccessible_callback(self, name, **kwargs):
+    return redirect(url_for('home'))
+
+#function to restricts access to admin model view pages page to anyone other than "Admin"
+class MyModelView(ModelView):
+  def is_accessible(self):
+    if(current_user.is_authenticated and current_user.username == "Admin"):
+      return current_user.is_authenticated
+
+  def inaccessible_callback(self, name, **kwargs):
+    return redirect(url_for('home'))
+
+admin = Admin(app, name='microblog', template_mode='bootstrap3', index_view=MyAdminIndexView())
+admin.add_link(MenuLink(name='Logout', category='', url="/logout")) 
+
 
 class User(db.Model, UserMixin):
   id = db.Column(db.Integer, primary_key=True)
@@ -45,10 +75,6 @@ class Comment(db.Model):
   post = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
 
 
-@login_manager.user_loader
-def load_user(user_id):
-  return User.query.get(int(user_id))
-
 @app.route('/login')
 def loginPage():
   return render_template('login.html')
@@ -64,9 +90,10 @@ def register():
     return redirect(url_for('registrationPage'))
   if request.form['password1'] != request.form['password2']:
     return redirect(url_for('registrationPage'))
-  password = request.form['password1']
+  #genrates a hashed password using bcrypt
+  hashed_password = bcrypt.generate_password_hash(request.form['password1'])
   displayName = request.form['displayname']
-  user = User(username = username, password = password, displayName = displayName)
+  user = User(username = username, password = hashed_password, displayName = displayName)
   db.session.add(user)
   db.session.commit()
   return redirect(url_for('login'))
@@ -74,12 +101,18 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
   username = request.form['username']
+  password = request.form['password']
   user = User.query.filter_by(username = username).first()
-  if user is None or user.password != request.form['password']:
-    return redirect(url_for('loginPage'))
-  else:
-    login_user(user)
-    return redirect(url_for('home'))
+  #if this user exists 
+  if user:
+  #checks for encrypted password, if not match then back to login
+    if bcrypt.check_password_hash(user.password, password):
+      login_user(user)
+      if username == "Admin":
+        return redirect(url_for('admin.index'))
+      else:
+        return redirect(url_for('home'))
+  return redirect(url_for('loginPage'))
 
 @app.route('/')
 @login_required
@@ -124,9 +157,17 @@ def render_messages():
 def render_profile():
   return render_template('profile.html')
 
-admin.add_view(ModelView(User, db.session))
-admin.add_view(ModelView(Comment, db.session))
-admin.add_view(ModelView(Post, db.session))
+
+#simple logout url/function
+@app.route('/logout', methods=['GET', 'POST'])
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('loginPage'))
+
+admin.add_view(MyModelView(User, db.session))
+admin.add_view(MyModelView(Comment, db.session))
+admin.add_view(MyModelView(Post, db.session))
 
 if __name__ == '__main__':
     app.run(debug=True)
