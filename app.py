@@ -1,4 +1,4 @@
-from flask import Flask, render_template_string, render_template, request, redirect, url_for
+from flask import Flask, render_template_string, render_template, request, redirect, url_for, make_response
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin, AdminIndexView
@@ -8,6 +8,10 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from flask_bcrypt import Bcrypt
 from datetime import datetime
 
+from flask_migrate import Migrate
+from werkzeug.utils import secure_filename
+import uuid
+import os
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
@@ -17,13 +21,18 @@ CORS(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.sqlite"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
- 
+
+UPLOAD_FOLDER = 'static/images/'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 app.secret_key = 'super secret key'
 db = SQLAlchemy(app)
 db.init_app(app)
+
+migrate = Migrate(app, db)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -57,6 +66,8 @@ class User(db.Model, UserMixin):
   username = db.Column(db.String, unique=True, nullable=False)
   displayName = db.Column(db.String, unique=True, nullable=False)
   password = db.Column(db.String, unique=True, nullable=False)
+  profile_pic = db.Column(db.String(150), nullable=True)
+  bio = db.Column(db.String(), nullable=True)
   posts = db.relationship('Post', backref="User")
   comments = db.relationship('Comment', backref="User")
 
@@ -93,9 +104,18 @@ def register():
   #genrates a hashed password using bcrypt
   hashed_password = bcrypt.generate_password_hash(request.form['password1'])
   displayName = request.form['displayname']
-  user = User(username = username, password = hashed_password, displayName = displayName)
+  
+  # Grab image file name
+  filename = secure_filename(request.files['profile_picture'].filename)
+  pfp_filename = str(uuid.uuid1()) + "_" + filename
+
+  # Save image
+  request.files['profile_picture'].save(os.path.join(app.config['UPLOAD_FOLDER'],  pfp_filename))
+
+  user = User(username = username, password = hashed_password, displayName = displayName, profile_pic=pfp_filename)
   db.session.add(user)
   db.session.commit()
+
   return redirect(url_for('login'))
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -155,7 +175,25 @@ def render_messages():
 @app.route('/profile', methods=['GET'])
 @login_required
 def render_profile():
-  return render_template('profile.html')
+  pfp = current_user.profile_pic
+  name = current_user.displayName
+  bio = current_user.bio
+
+  if bio == None:
+    bio = "Click me to edit bio!"
+
+  posts = Post.query.filter_by(author=current_user.id).all()
+
+  return render_template('profile.html', pfp=pfp, name = name, bio = bio, posts=posts)
+
+@app.route('/update_bio', methods=['POST'])
+@login_required
+def update_bio():
+
+  current_user.bio = (request.json['new_bio'])
+  db.session.commit()
+
+  return redirect(url_for('render_profile'))
 
 
 #simple logout url/function

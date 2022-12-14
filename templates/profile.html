@@ -11,6 +11,9 @@
 
   <script src="https://kit.fontawesome.com/c678b401a2.js" crossorigin="anonymous"></script>
 
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="{{ url_for('static', filename='javascript/profile.js') }}"></script>
+
 </head>
 
 <body>
@@ -35,6 +38,49 @@
         </ul>
     </div>
     </nav>
+
+
+    <div class="card mx-auto mt-4 w-50">
+        <div class="row p-5">
+
+            <!--Profile Picture-->
+            <div class="col-md-auto" id="pfp-container">
+                <img id="pfp" src="/static/images/{{ pfp }}" alt="profile image" class="rounded-circle">
+            </div>
+
+            <!--Profile Info-->
+            <div class="col">
+                <h1>{{ name }}</h1>
+                <br>
+                <div>
+                    <textarea class="w-75" id="bio" autocomplete="off"> {{ bio }} </textarea>
+                    <br><br>
+                    <input type="submit" value="Update Bio" class="btn btn-outline-primary" onclick="update_bio()">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-page">
+        {% if post != None %}
+            {% for post in posts %}
+            <a class="post-link" href="{{url_for('post', postID=post.id)}}">
+            <div class="post">
+                <div class="info">
+                <h3>{{post.User.displayName}}</h3>
+                <h3>{{post.timePosted.strftime('%m/%d %H:%M')}}</h3>
+                </div>
+        
+                <p class="post-text">{{post.text}}</p>
+        
+                {%if post.comments%}
+                <a href="{{url_for('post', postID=post.id)}}" class="load-comments">Load Comments</a>
+                {%endif%}
+            </div>
+            </a>
+            {%endfor%}
+        {% endif %}
+      </div>
 
 </body>
 </html>

@@ -14,7 +14,7 @@
     <div class="registration-outer">
       <div class="registration-inner">
         <h1 class="registration-title">Register Account</h1>
-        <form action="{{ url_for('register')}}" method="post">
+        <form action="{{ url_for('register')}}" method="post" enctype="multipart/form-data">
           <input type="text" name="displayname" id="displayName" placeholder="Display name">
           <br><br>
           <!-- <label for="userName">Username</label> -->
@@ -24,6 +24,8 @@
           <input type="password" name="password1" id="Password1" placeholder="Password">
           <br><br>
           <input type="password" name="password2" id="password1" placeholder="Re-type Password">
+          <br><br>
+          <input type="file" name="profile_picture" accept="image/*">
           <br><br>
           <button type="submit" value="submit" class="register-button">Register</button>
         </form>
