@@ -32,6 +32,11 @@ app.secret_key = 'super secret key'
 db = SQLAlchemy(app)
 db.init_app(app)
 
+followers = db.Table('followers',
+    db.Column('follower_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('followed_id', db.Integer, db.ForeignKey('user.id'))
+)
+
 migrate = Migrate(app, db)
 
 @login_manager.user_loader
@@ -70,6 +75,23 @@ class User(db.Model, UserMixin):
   bio = db.Column(db.String(), nullable=True)
   posts = db.relationship('Post', backref="User")
   comments = db.relationship('Comment', backref="User")
+  followed = db.relationship(
+        'User', secondary=followers,
+        primaryjoin=(followers.c.follower_id == id),
+        secondaryjoin=(followers.c.followed_id == id),
+        backref=db.backref('followers', lazy='dynamic'), lazy='dynamic')
+
+  def follow(self, user):
+        if not self.is_following(user):
+            self.followed.append(user)
+
+  def unfollow(self, user):
+        if self.is_following(user):
+            self.followed.remove(user)
+
+  def is_following(self, user):
+        return self.followed.filter(
+            followers.c.followed_id == user.id).count() > 0
 
 class Post(db.Model):
   id = db.Column(db.Integer, primary_key=True)
@@ -84,7 +106,6 @@ class Comment(db.Model):
   author = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
   timePosted = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
   post = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
-
 
 @app.route('/login')
 def loginPage():
@@ -203,9 +224,22 @@ def logout():
     logout_user()
     return redirect(url_for('loginPage'))
 
-admin.add_view(MyModelView(User, db.session))
-admin.add_view(MyModelView(Comment, db.session))
-admin.add_view(MyModelView(Post, db.session))
+@app.route('/follow/<int:UserID>', methods=['GET', 'POST'])
+@login_required
+def follow(UserID):
+  current_user.follow(UserID)
+  return redirect(render_profile)
+
+@app.route('/unfollow/<int:UserID>', methods=['GET', 'POST'])
+@login_required
+def unfollow(UserID):
+  current_user.unfollow(UserID)
+  return redirect(render_profile)
+
+
+admin.add_view(ModelView(User, db.session))
+admin.add_view(ModelView(Comment, db.session))
+admin.add_view(ModelView(Post, db.session))
 
 if __name__ == '__main__':
     app.run(debug=True)
