@@ -1,4 +1,4 @@
-from flask import Flask, render_template_string, render_template, request, redirect, url_for, make_response
+from flask import Flask, render_template_string, render_template, request, redirect, url_for, make_response, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin, AdminIndexView
@@ -32,11 +32,6 @@ app.secret_key = 'super secret key'
 db = SQLAlchemy(app)
 db.init_app(app)
 
-followers = db.Table('followers',
-    db.Column('follower_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('followed_id', db.Integer, db.ForeignKey('user.id'))
-)
-
 migrate = Migrate(app, db)
 
 @login_manager.user_loader
@@ -65,14 +60,18 @@ class MyModelView(ModelView):
 admin = Admin(app, name='microblog', template_mode='bootstrap3', index_view=MyAdminIndexView())
 admin.add_link(MenuLink(name='Logout', category='', url="/logout")) 
 
+followers = db.Table('followers',
+    db.Column('follower_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('followed_id', db.Integer, db.ForeignKey('user.id'))
+)
 
 class User(db.Model, UserMixin):
   id = db.Column(db.Integer, primary_key=True)
   username = db.Column(db.String, unique=True, nullable=False)
   displayName = db.Column(db.String, unique=True, nullable=False)
   password = db.Column(db.String, unique=True, nullable=False)
-  profile_pic = db.Column(db.String(150), nullable=True)
-  bio = db.Column(db.String(), nullable=True)
+  profile_pic = db.Column(db.String(), nullable=True)
+  bio = db.Column(db.String(150), nullable=True)
   posts = db.relationship('Post', backref="User")
   comments = db.relationship('Comment', backref="User")
   likes = db.relationship('Likes', backref="User")
@@ -85,13 +84,15 @@ class User(db.Model, UserMixin):
   def follow(self, user):
       if not self.is_following(user):
           self.followed.append(user)
+          db.session.commit()
 
   def unfollow(self, user):
       if self.is_following(user):
           self.followed.remove(user)
+          db.session.commit()
 
   def is_following(self, user):
-      return self.followed.filter(followers.c.followed_id == user.id).count() > 0
+    return self.followed.filter(followers.c.followed_id == user.id).count() > 0
 
   def has_liked_post(self, post):
     if Likes.query.filter_by(post = post.id, user = current_user.id).first() is not None:
@@ -211,21 +212,46 @@ def makePost():
 @app.route('/messages', methods=['GET'])
 @login_required
 def render_messages():
-  return render_template('messages.html')
 
-@app.route('/profile', methods=['GET'])
+  following_list =  current_user.followed.all()
+
+  return render_template('messages.html', following_list = following_list)
+
+@app.route('/profile/<int:userid>', methods=['GET'])
 @login_required
-def render_profile():
-  pfp = current_user.profile_pic
-  name = current_user.displayName
-  bio = current_user.bio
+def render_profile(userid):
+
+  if userid  == 0:
+    userid = current_user.id
+
+  user = User.query.filter_by(id=userid).first()
+
+  name = user.displayName
+
+
+  pfp = user.profile_pic
+  
+  if pfp == None:
+    pfp = 'empty_user.png'
+
+  bio = user.bio
 
   if bio == None:
-    bio = "Click me to edit bio!"
+    bio = "I need to edit my bio"
 
-  posts = Post.query.filter_by(author=current_user.id).all()
+  posts = Post.query.filter_by(author=user.id).all()
 
-  return render_template('profile.html', pfp=pfp, name = name, bio = bio, posts=posts)
+  view = 'browsing'
+
+  if current_user.id == user.id:
+    view = 'user'
+
+  isFollowing = False
+
+  if current_user.is_following(user):
+    isFollowing = True
+
+  return render_template('profile.html', pfp=pfp, name = name, bio = bio, posts=posts, view=view, userid = userid, isFollowing = isFollowing)
 
 @app.route('/update_bio', methods=['POST'])
 @login_required
@@ -247,14 +273,16 @@ def logout():
 @app.route('/follow/<int:UserID>', methods=['GET', 'POST'])
 @login_required
 def follow(UserID):
-  current_user.follow(UserID)
-  return redirect(render_profile)
+  user = User.query.filter_by(id=UserID).first()
+  current_user.follow(user)
+  return make_response(jsonify({'response': 'successfully followed'}), 200)
 
 @app.route('/unfollow/<int:UserID>', methods=['GET', 'POST'])
 @login_required
 def unfollow(UserID):
-  current_user.unfollow(UserID)
-  return redirect(render_profile)
+  user = User.query.filter_by(id=UserID).first()
+  current_user.unfollow(user)
+  return make_response(jsonify({'response': 'successfully unfollowed'}), 200)
 
 @app.route('/like/<int:PostID>', methods=['GET', 'POST'])
 @login_required
@@ -267,6 +295,22 @@ def like(PostID):
   db.session.commit()
   return redirect(url_for('home'))
 
+@app.route('/lookup', methods=['GET'])
+@login_required
+def lookup():
+  return render_template('lookup.html')
+
+@app.route('/lookup_users', methods=['POST'])
+def lookup_user():
+  input = request.json['input']
+
+  users = User.query.filter(User.username.contains(input)).all()
+
+  data = [[user.id, user.username, user.profile_pic] for user in users]
+
+  response = jsonify({'users': data})
+
+  return make_response(response, 200)
 
 admin.add_view(ModelView(User, db.session))
 admin.add_view(ModelView(Comment, db.session))

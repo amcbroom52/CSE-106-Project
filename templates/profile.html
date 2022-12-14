@@ -12,7 +12,6 @@
   <script src="https://kit.fontawesome.com/c678b401a2.js" crossorigin="anonymous"></script>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script src="{{ url_for('static', filename='javascript/profile.js') }}"></script>
 
 </head>
 
@@ -21,22 +20,27 @@
     <!-- Navbar -->
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav mx-auto">
-        
-        <li class="nav-item">
-            <a class="nav-link" href="/"><i class="fa-sharp fa-solid fa-newspaper"></i></a>
-        </li>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
 
-        <li class="nav-item">
-            <a class="nav-link" href="/messages"><i class="fa-solid fa-envelope"></i></a>
-        </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/"><i class="fa-sharp fa-solid fa-newspaper"></i></a>
+            </li>
 
-        <li class="nav-item active">
-            <a class="nav-link" href="/profile"><i class="fa-solid fa-user"></i></a>
-        </li>
-        </ul>
-    </div>
+            <li class="nav-item">
+                <a class="nav-link" href="/lookup"><i class="fa-solid fa-magnifying-glass"></i></a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="/messages"><i class="fa-solid fa-envelope"></i></a>
+            </li>
+
+            <li class="nav-item active">
+                <a class="nav-link" href="/profile/0"><i class="fa-solid fa-user"></i></a>
+            </li>
+            </ul>
+        </div>
+        <a href="{{url_for('logout')}}"><button class="btn btn-outline-dark">logout</button></a>
     </nav>
 
 
@@ -44,8 +48,13 @@
         <div class="row p-5">
 
             <!--Profile Picture-->
-            <div class="col-md-auto" id="pfp-container">
+            <div class="col-md-auto pfp-container" id="pfp-container">
                 <img id="pfp" src="/static/images/{{ pfp }}" alt="profile image" class="rounded-circle">
+                {% if view == 'user' %}
+                    <div class="overlay">
+                        <div class="text">Click to Change</div>
+                    </div>
+                {% endif %}
             </div>
 
             <!--Profile Info-->
@@ -53,9 +62,18 @@
                 <h1>{{ name }}</h1>
                 <br>
                 <div>
-                    <textarea class="w-75" id="bio" autocomplete="off"> {{ bio }} </textarea>
-                    <br><br>
-                    <input type="submit" value="Update Bio" class="btn btn-outline-primary" onclick="update_bio()">
+                    {% if view == 'user' %}
+                        <textarea class="w-75" id="bio" autocomplete="off"> {{ bio }} </textarea>
+                        <br><br>
+                        <input type="submit" value="Update Bio" class="btn btn-outline-primary" onclick="update_bio()">
+                    {% else %}
+                        <p class="w-75" id="bio" autocomplete="off"> {{ bio }} </p>
+                        {% if isFollowing  == False %}
+                            <input  id="follow" type="submit" value="Follow +" class="btn btn-outline-primary" onclick="follow(`{{ userid }}`)">
+                        {% else %}
+                            <input id="unfollow" type="submit" value="Unfollow" class="btn btn-outline-secondary" onclick="unfollow(`{{ userid }}`)">
+                        {% endif %}
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -81,6 +99,5 @@
             {%endfor%}
         {% endif %}
       </div>
-
 </body>
 </html>

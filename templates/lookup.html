@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Feed</title>
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+  <script src="https://kit.fontawesome.com/c678b401a2.js" crossorigin="anonymous"></script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="{{ url_for('static', filename='javascript/lookup.js') }}"></script>
+
+</head>
+
+<body>
+
+  <!-- Navbar -->
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+
+            <li class="nav-item">
+                <a class="nav-link" href="/"><i class="fa-sharp fa-solid fa-newspaper"></i></a>
+            </li>
+
+            <li class="nav-item active  a">
+                <a class="nav-link" href="/lookup"><i class="fa-solid fa-magnifying-glass"></i></a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="/messages"><i class="fa-solid fa-envelope"></i></a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="/profile/0"><i class="fa-solid fa-user"></i></a>
+            </li>
+            </ul>
+        </div>
+        <a href="{{url_for('logout')}}"><button class="btn btn-outline-dark">logout</button></a>
+    </nav>
+
+    <div class="container mx-auto w-50 mt-3">
+        <div class="row pt-2 d-flex justify-content-center">
+            <input id="input" type="text" placeholder="Type in a user" autocomplete="off">
+        </div>
+        <div class="row p-2 d-flex justify-content-center">
+            <input type="submit" class="btn btn-primary" value="Search" onclick="lookup()">
+        </div>
+    </div>
+
+    <div class="container mx-auto w-25 mt-5" id="user-results">
+
+    </div>
+
+</body>
+</html>

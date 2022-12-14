@@ -18,6 +18,8 @@
     <div class="write-comment">
       <form action="{{url_for('makeComment', postID=post.id)}}" method="POST">
         <input type="text" name="text" placeholder="Leave a comment...">
+        <br>
+        <br>
         <button type="submit" value="post" class="comment-button">Post</button>
       </form>
     </div>
