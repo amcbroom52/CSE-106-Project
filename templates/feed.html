@@ -51,9 +51,21 @@
 
         <p class="post-text">{{post.text}}</p>
 
-        {%if post.comments%}
-        <a href="{{url_for('post', postID=post.id)}}" class="load-comments">Load Comments</a>
-        {%endif%}
+        <div class="post-bottom">
+          <div>
+            {%if post.comments%}
+            <a href="{{url_for('post', postID=post.id)}}" class="load-comments">Load Comments</a>
+            {%endif%}
+          </div>
+          <div>
+            {%if current_user.has_liked_post(post)%}
+            <a href="{{url_for('like', PostID=post.id)}}"><button>Unlike</button></a>
+            {%else%}
+            <a href="{{url_for('like', PostID=post.id)}}"><button>Like</button></a>
+            {%endif%}
+            {{post.likes|length}} likes
+          </div>
+        </div>
       </div>
     </a>
     {%endfor%}

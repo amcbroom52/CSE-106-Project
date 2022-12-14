@@ -75,6 +75,7 @@ class User(db.Model, UserMixin):
   bio = db.Column(db.String(), nullable=True)
   posts = db.relationship('Post', backref="User")
   comments = db.relationship('Comment', backref="User")
+  likes = db.relationship('Likes', backref="User")
   followed = db.relationship(
         'User', secondary=followers,
         primaryjoin=(followers.c.follower_id == id),
@@ -82,16 +83,22 @@ class User(db.Model, UserMixin):
         backref=db.backref('followers', lazy='dynamic'), lazy='dynamic')
 
   def follow(self, user):
-        if not self.is_following(user):
-            self.followed.append(user)
+      if not self.is_following(user):
+          self.followed.append(user)
 
   def unfollow(self, user):
-        if self.is_following(user):
-            self.followed.remove(user)
+      if self.is_following(user):
+          self.followed.remove(user)
 
   def is_following(self, user):
-        return self.followed.filter(
-            followers.c.followed_id == user.id).count() > 0
+      return self.followed.filter(followers.c.followed_id == user.id).count() > 0
+
+  def has_liked_post(self, post):
+    if Likes.query.filter_by(post = post.id, user = current_user.id).first() is not None:
+      return True
+    else:
+      return False
+
 
 class Post(db.Model):
   id = db.Column(db.Integer, primary_key=True)
@@ -99,6 +106,10 @@ class Post(db.Model):
   author = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
   timePosted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
   comments = db.relationship('Comment', backref='Post')
+  likes = db.relationship('Likes', backref='Post')
+
+  def num_likes(self):
+    return Likes.query.filter_by(post = self.id).count()
 
 class Comment(db.Model):
   id = db.Column(db.Integer, primary_key=True)
@@ -106,6 +117,15 @@ class Comment(db.Model):
   author = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
   timePosted = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
   post = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+
+class Likes(db.Model):
+  user = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+  post = db.Column(db.Integer, db.ForeignKey('post.id'), primary_key=True)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+  return User.query.get(int(user_id))
 
 @app.route('/login')
 def loginPage():
@@ -235,6 +255,17 @@ def follow(UserID):
 def unfollow(UserID):
   current_user.unfollow(UserID)
   return redirect(render_profile)
+
+@app.route('/like/<int:PostID>', methods=['GET', 'POST'])
+@login_required
+def like(PostID):
+  like = Likes(post = PostID, user = current_user.id)
+  if Likes.query.filter_by(post = like.post, user = like.user).first() is None:
+    db.session.add(like)
+  else:
+    Likes.query.filter_by(post = like.post, user = like.user).delete()
+  db.session.commit()
+  return redirect(url_for('home'))
 
 
 admin.add_view(ModelView(User, db.session))
