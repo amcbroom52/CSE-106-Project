@@ -5,7 +5,7 @@ body {
 .post-page {
   width: 70%;
   margin: auto;
-  margin-top:2.5%;
+  margin-top: 2.5%;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -33,6 +33,12 @@ body {
 
 .post-text {
   font-size: 125%;
+}
+
+.post-bottom {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
 
 .write-comment {
